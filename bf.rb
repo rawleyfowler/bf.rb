@@ -11,83 +11,86 @@ module BFInterpreter
 
     def set x
       check_val_and_throw
-      @values[@ptr] = x
+      values[ptr] = x
     end
 
     def get
       check_val_and_throw
-      @values[@ptr]
+      values[ptr]
     end
 
     def incr_ptr
-      @ptr += 1
-      @ptr = 255 if @ptr > 255
+      ptr += 1
+      ptr = 255 if ptr > 255
     end
 
     def decr_ptr
-      @ptr -= 1
-      @ptr = 0 if @ptr < 0
+      ptr -= 1
+      ptr = 0 if ptr < 0
     end
 
     def incr_val
-      @values[@ptr] += 1
+      values[ptr] += 1
     end
 
     def decr_val
-      @values[@ptr] -= 1
-    end
-
-    def ptr
-      @ptr
+      values[ptr] -= 1
     end
 
     def check_val_and_throw
-      if @ptr < 0 || @ptr > @values.count - 1
+      if ptr < 0 || ptr > values.count - 1
         raise StandardError "Attempting to index value outside tap of length: #{@values.count} with index #{ptr}"
       end
     end
+
+    private
+    attr_reader :values, :ptr
   end
 
   class Interpreter
-    @@tape = Tape.new
+    class << self
+      def find_loop_endings str
+        bracket_pairs = {}
 
-    def self.find_loop_endings str
-      bracket_pairs = {}
+        last_bracket = str.length
 
-      last_bracket = str.length
-
-      t = 0
-      i = 0
-      while i < str.length do
-        if str[i] == "["
-          t += 1
-          j = i+1
-          while j < str.length
-            if str[j] == "["
-              t += 1
-            elsif str[j] == "]"
-              t -= 1
-              if t == 0
-                bracket_pairs[i] = j
-                break
+        t = 0
+        i = 0
+        while i < str.length do
+          if str[i] == "["
+            t += 1
+            j = i+1
+            while j < str.length
+              if str[j] == "["
+                t += 1
+              elsif str[j] == "]"
+                t -= 1
+                if t == 0
+                  bracket_pairs[i] = j
+                  break
+                end
               end
+              j += 1
             end
-            j += 1
           end
+          i += 1 
         end
-        i += 1 
+        bracket_pairs
       end
-      bracket_pairs
     end
 
-    def self.interpret_string(str)
+    def initialize
+      @tape = Tape.new
+    end
+
+    def interpret_string(str)
       s = str.gsub(/[^><+-\.,\[\]]/, '')
       
       in_loop = false
       loop_begin = -1
       loop_end = -1
 
-      bracket_pairs = self.find_loop_endings s
+      bracket_pairs = Interpreter.find_loop_endings s
       
       i = 0
       while i < s.length
@@ -107,7 +110,7 @@ module BFInterpreter
           while in_loop do
             self.interpret_string(s[loop_begin..loop_end])
 
-            if @@tape.get == 0
+            if tape.get == 0
               c = s[i]
               # Break out back to normal iteration
               in_loop = false
@@ -115,32 +118,36 @@ module BFInterpreter
           end
         end
       
-        self.handle_char c
+        handle_char c
         i += 1
       end
     end
     
-    def self.interpret_file(path)
+    def interpret_file(path)
       data = File.open(path).read
-      self.interpret_string data
+      interpret_string data
     end
 
-    def self.handle_char c
+    private
+    attr_reader :tape
+    
+    def handle_char c
       case c
       when ">"
-        @@tape.incr_ptr
+        @tape.incr_ptr
       when "<"
-        @@tape.decr_ptr
+        @tape.decr_ptr
       when "+"
-        @@tape.incr_val
+        @tape.incr_val
       when "-"
-        @@tape.decr_val
+        @tape.decr_val
       when "."
-        print @@tape.get.chr
+        print @tape.get.chr
       when ","
-        @@tape.set(gets.ord)
+        @tape.set(gets.ord)
       end
     end
+    
   end
 end
 
@@ -163,10 +170,12 @@ if ARGV.count < 1 || ARGV.count > 2
   usage
 end
 
-if ARGV.count == 2 && ARV[0] == "-f"
-  BFInterpreter::Interpreter.interpret_file ARGV[1]
+interpreter = BFInterpreter::Interpreter.new
+
+if ARGV.count == 2 && ARGV[0] == "-f"
+  interpreter.interpret_file ARGV[1]
 end
 
 if ARGV.count == 1
-  BFInterpreter::Interpreter.interpret_string ARGV[0]
+  interpreter.interpret_string ARGV[0]
 end
