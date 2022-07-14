@@ -155,6 +155,10 @@ def usage
   exit 1
 end
 
+if ARGV.count == 1 && ARGV[0] == "-h"
+  usage
+end
+
 if ARGV.count < 1 || ARGV.count > 2
   usage
 end
