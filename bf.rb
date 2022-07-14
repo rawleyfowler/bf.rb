@@ -163,7 +163,7 @@ if ARGV.count < 1 || ARGV.count > 2
   usage
 end
 
-if ARGV.count == 2 && ARV[0] == "-f"
+if ARGV.count == 2 && ARGV[0] == "-f"
   BFInterpreter::Interpreter.interpret_file ARGV[1]
 end
 
