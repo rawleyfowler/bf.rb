@@ -97,7 +97,7 @@ module BFInterpreter
         c = s[i]
 
         if c == "["
-          if i == s.length - 1 || bracket_pairs[i] == nil
+          if i == s.length - 1 || !bracket_pairs[i]
             puts "Invalid loop at position #{i}"
             exit 1
           end
@@ -147,7 +147,6 @@ module BFInterpreter
         @tape.set(gets.ord)
       end
     end
-    
   end
 end
 
@@ -166,7 +165,7 @@ if ARGV.count == 1 && ARGV[0] == "-h"
   usage
 end
 
-if ARGV.count < 1 || ARGV.count > 2
+if !(1..2).include? ARGV.count
   usage
 end
 
