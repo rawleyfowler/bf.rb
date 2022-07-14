@@ -171,7 +171,6 @@ if ARGV.count < 1 || ARGV.count > 2
 end
 
 interpreter = BFInterpreter::Interpreter.new
-
 if ARGV.count == 2 && ARGV[0] == "-f"
   interpreter.interpret_file ARGV[1]
 end
