@@ -21,12 +21,12 @@ module BFInterpreter
 
     def incr_ptr
       ptr += 1
-      ptr = 255 if ptr > 255
+      ptr = ptr.clamp(..255)
     end
 
     def decr_ptr
       ptr -= 1
-      ptr = 0 if ptr < 0
+      ptr = 0 if ptr.negative?
     end
 
     def incr_val
@@ -44,7 +44,13 @@ module BFInterpreter
     end
 
     private
-    attr_reader :values, :ptr
+    def ptr
+      @ptr
+    end
+
+    def values
+      @values
+    end
   end
 
   class Interpreter
