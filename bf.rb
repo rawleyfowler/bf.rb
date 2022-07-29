@@ -39,7 +39,7 @@ module BFInterpreter
 
     def check_val_and_throw
       if ptr < 0 || ptr > values.count - 1
-        raise StandardError "Attempting to index value outside tap of length: #{@values.count} with index #{ptr}"
+        raise StandardError "Attempting to index value outside tape of length: #{@values.count} with index #{ptr}"
       end
     end
 
